@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "phaser": "^3.55.2"
+  },
+  "name": "boids",
+  "version": "1.0.0",
+  "description": "Simulation of flocking behaviour first published by Reynolds.",
+  "main": "boids.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

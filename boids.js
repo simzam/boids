@@ -1,15 +1,8 @@
 let cursors;
-let BOIDS = 5;
+let BOIDS = 1;
 let rangeCollision = 20;
 let rangeInfluence = 200;
 
-class Boids extends Phaser.Physics.Arcade.Group
-{
-    constructor (scene)
-    {
-        super(scene)
-    }
-}
 
 class Example extends Phaser.Scene
 {
@@ -20,25 +13,41 @@ class Example extends Phaser.Scene
 
     create ()
     {
+        //this.physics.world.setBoundsCollision(true, true, true, true);
+        //this.physics.world.on('worldbounds', onWorldBounds);
+
+        let deltax = 30;
+        this.physics.world.setBounds(deltax,deltax,config.width - deltax,config.height - deltax);
         console.log('simon');
-        this.flock = this.add.group({
-            key: 'boid',
-            velocityX: 10,
-            velocityY: 10,
-            bounceX: 1,
-            bouncey: 1,
-            quantity: BOIDS,
-            collideWorldbounds: true,
-            allowRotation: true,
-            visible: true,
-        })
-        // TODO M
-        Phaser.Actions.RandomRectangle(this.flock.getChildren(), this.physics.world.bounds);
+        this.flock = this.physics.add.group({
+            collideWorldBounds: true,
+            bounceX: 0,
+            bounceY: 0.8,
+            velocityY: 0,
+            velocityX: 0,
+            checkWorldBounds: true
+        });
+
+        for (let i = 0; i < BOIDS; i++) {
+            let boid = this.flock.create(Phaser.Math.Between(700, 700), Phaser.Math.Between(900, 900), 'boid');
+            boid.angle = Phaser.Math.Between(-180, 180);
+            boid.setMaxVelocity(900);
+            boid.setCollideWorldBounds(true);
+        }
+        // Phaser.Actions.Call(group.getChildren(), function (bal) {
+        //     ball.body.onWorldBounds = true;
+        // });
+    
+        //this.physics.world.on('worldbounds', onWorldBounds);
         cursors = this.input.keyboard.createCursorKeys();
-        //Phaser.Actions.SetRotation(this.flock.getChildren(), 10);
-        
+
     }
     
+    onWorldBounds(body) 
+    {
+        log.console('boundcc bounce');
+    }
+
     proximity(boid, neighbour)
     {
         let dist = Phaser.Math.Distance.Between(boid.x, boid.y, neighbour.x, neighbour.y)
@@ -93,57 +102,45 @@ class Example extends Phaser.Scene
         console.log(influencingNeighbours, collidingNeighbours);
     }
 
-    keyHandler()
-    {
-        if (cursors.left.isDown)
-        {
-
-        }
-        else if (cursors.right.isDown)
-        {
-            console.log("DOWN");
-        }
-        if (cursors.up.isDown)
-        {
-            console.log("DOWN");
-        }
-        else if (cursors.down.isDown)
-        {
-            console.log("DOWN");
-        }
-    }   
-    
     update ()
-    {
-        console.log(this.flock.getChildren()[0].x, this.flock.getChildren()[0].y);
-        // this.keyHandler();
+    {   
         for (let i = 0; i < this.flock.getLength(); i++) {
-            // let flip = (Math.random() < 0.90) ? true : false;
-            let boid = this.flock.getChildren()[i];
-            console.log(this.flock.getChildren()[0].x, this.flock.getChildren()[0].y);
-            boid.velocityX, boid.velocityY = this.setVelocity(boid);
-            console.log(this.flock.getChildren()[0].x, this.flock.getChildren()[0].y);
+                let boid = this.flock.getChildren()[i];
+                console.log(boid.body.checkWorldBounds());
+                //console.log(boid.x, boid.y, boid.body.world.bounds, 
+                //    config.width, 
+                //    config.height);
+                if (boid.body.checkWorldBounds()) {
+                    console.log("BOUNCE");
+                    boid.alpha -= 10;
+                }
+                if (cursors.left.isDown)
+                {
+                    boid.setAngle(Phaser.Math.Between(-180, 188));
+                   if (Math.random() < 0.1)
+                        boid.setVelocityX(Phaser.Math.Between(-300, 1300));
+                }         
         }
     }
 }
 
 const config = {
     type: Phaser.AUTO,
-    width: window.innerWidth-15,
-    height: window.innerHeight-15,
+    width: window.innerWidth-65,
+    height: window.innerHeight-65,
     backgroundColor: '#2dadfd',
     scene: [ Example ],
     physics: {
         default: 'arcade',
         arcade: {
-            debug: false,
-            gravity: { y: 300 }
+            debug: true,
+            gravity: { y: 0 }
         }
     },
-    fps: {
-        target: 24,
-        forceSetTimeOut: true
-    },
+//    fps: {
+//        target: 30,
+//        forceSetTimeOut: false
+//    },
 };
 
 const game = new Phaser.Game(config);
